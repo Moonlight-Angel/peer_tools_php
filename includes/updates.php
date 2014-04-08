@@ -53,6 +53,11 @@ class Updates
 						}
 					}
 				}
+				else
+				{
+					if (!$silent)
+						Utils::message('You are up to date.');
+				}
 			}
 		}
 		return false;
