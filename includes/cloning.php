@@ -141,7 +141,7 @@ class Cloning
 				if ($response)
 				{
 					exec('rm -rf ./' . $subdirectory . $value, $output, $return);
-					if ($return > '1')
+					if ($return > '0')
 					{
 						Utils::error('Error while removing directory. Switching to next.');
 						continue ;

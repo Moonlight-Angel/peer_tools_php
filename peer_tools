@@ -10,6 +10,7 @@ require('includes/credentials.php');
 require('includes/auth.php');
 require('includes/cloning.php');
 require('includes/cleaning.php');
+require('includes/updates.php');
 
 /**
  * Main class, it all starts here.
@@ -39,6 +40,7 @@ class App
 			'Remove .git folders'						=> ['Cleaning', 'remove_git_corrections'],
 			'Delete credentials'						=> [$this->credentials, 'delete_credentials'],
 			'Delete configuration file'					=> [$this->configuration, 'delete_configuration'],
+			'Check for updates'							=> ['Updates', 'check_updates'],
 			'Exit'										=> [$this, 'quit']
 		);
 	}
@@ -46,6 +48,7 @@ class App
 	public function run()
 	{
 		$choice = 0;
+		Updates::check_updates(true);
 
 		while (42)
 		{
