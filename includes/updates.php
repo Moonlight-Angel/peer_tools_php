@@ -22,6 +22,7 @@ class Updates
 		{
 			if (!$silent)
 				Utils::message('Checking if there is some update to install...');
+			$output = array();
 			exec('cd ' . APP_PATH . ' && git cherry master origin/master', $output, $return);
 			if ($return > '0')
 				Utils::error('Unable to git cherry.');
@@ -30,6 +31,7 @@ class Updates
 				if (count($output) > 0)
 				{
 					Utils::success('Updates are available !');
+					$output = array();
 					exec('cd ' . APP_PATH . ' && git show master..origin/master -n 1 -s --format=%B', $output, $return);
 					if ($return > 0)
 						Utils::error('Unable to fetch latest commit message.');

@@ -39,7 +39,7 @@ class Auth
 		if (strstr($content, 'Bienvenue'))
 		{
 			Utils::success('Connected to intra.');
-			return true;
+			return $ch;
 		}
 		else if (strstr($content, 'sont invalides'))
 			Utils::error('Error while connecting to intra : wrong credentials.');
@@ -90,7 +90,7 @@ class Auth
 		if (strstr($content, 'Hello,'))
 		{
 			Utils::success('Connected to dashboard.');
-			return true;
+			return $ch;
 		}
 		else if (strstr($content, 'didn\'t match'))
 			Utils::error('Error while connecting to dashboard : wrong credentials.');
@@ -126,7 +126,8 @@ class Auth
 	 */
 	public static function close_connection($ch)
 	{
-		curl_close($ch);
+		if ($ch !== false)
+			curl_close($ch);
 		if (file_exists(COOKIE_JAR))
 			unlink(COOKIE_JAR);
 	}

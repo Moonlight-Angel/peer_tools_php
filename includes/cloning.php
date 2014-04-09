@@ -9,7 +9,7 @@ class Cloning
 	private $corrections_matches;
 	private $correctors_matches;
 
-	public function __construct($credentials_instance)
+	public function __construct(Credentials $credentials_instance)
 	{
 		$this->credentials = $credentials_instance;
 		$this->corrections_matches = '';
@@ -24,79 +24,16 @@ class Cloning
 		$ch = Auth::login_intra($this->credentials->get_username(), $this->credentials->get_password(), $content);
 		if ($ch === false)
 			return ;
-		if ($this->parse_corrections($content))
+		$this->corrections_matches = Parsing::parse_corrections($content);
+		if ($this->corrections_matches !== false)
 		{
-			$this->epur_corrections();
 			$choice = $this->display_corrections_menu();
 			if ($choice == -1)
-			{
 				Utils::error('Operation canceled.');
-				return ;
-			}
-			$this->do_clone($choice);
+			else
+				$this->do_clone($choice);
 		}
-	}
-
-	/**
-	 * Parses the source code to fetch corrections.
-	 *
-	 * @param  string  $content  The page source.
-	 * @return true and false if the parsing has succeeded or failed.
-	 */
-	private function parse_corrections($content)
-	{
-		if (preg_match_all(CORRECTIONS_HEAD_REGEX, $content, $matches))
-		{
-			array_shift($matches);
-			$this->corrections_matches['projects'] = $matches[0];
-			$this->corrections_matches['enddates'] = $matches[1];
-			$this->corrections_matches['corrections'] = $matches[2];
-			$this->corrections_matches['stats']['count'] = 0;
-			$this->corrections_matches['stats']['done'] = 0;
-			$lines = explode(PHP_EOL, $this->corrections_matches['corrections'][0]);
-			foreach ($lines as $value) {
-				if (strpos($value, 'note'))
-				{
-					if (strpos($value, 'avez donné la note'))
-						$this->corrections_matches['stats']['done']++;
-					$this->corrections_matches['stats']['count']++;
-				}
-			}
-			foreach ($this->corrections_matches['corrections'] as $key => $value) {
-				if (!preg_match_all(CORRECTIONS_PEOPLE_REGEX, $value, $matches))
-				{
-					Utils::error('Error while trying to parse corrections.');
-					return false;
-				}
-				array_shift($matches);
-				$this->corrections_matches['corrections'][$key] = array();
-				$this->corrections_matches['corrections'][$key]['urls'] = $matches[0];
-				$this->corrections_matches['corrections'][$key]['uids'] = $matches[1];
-			}
-			return true;
-		}
-		else
-		{
-			Utils::error('No peer corrections available.');
-			return false;
-		}
-	}
-
-	/**
-	 * Cleans the whole corrections array from unneeded text.
-	 */
-	private function epur_corrections()
-	{
-		$projects = &$this->corrections_matches['projects'];
-		$corrections = &$this->corrections_matches['corrections'];
-		foreach ($projects as $project_id => $project_name) {
-			foreach ($corrections[$project_id]['uids'] as $correction_id => $correction_name) {
-				$actual_uid = $corrections[$project_id]['uids'][$correction_id];
-				$corrections[$project_id]['uids'][$correction_id] = str_replace($project_name . ' ', '', $actual_uid);
-				$corrections[$project_id]['urls'][$correction_id] = INTRA_URL . $corrections[$project_id]['urls'][$correction_id];
-			}
-			$projects[$project_id] = str_replace('Sujet ', '', $project_name);
-		}
+		Auth::close_connection($ch);
 	}
 
 	/**
@@ -112,8 +49,8 @@ class Cloning
 				'%s (%s) (%d/%d)',
 				$choices[$key],
 				$this->corrections_matches['enddates'][$key],
-				$this->corrections_matches['stats']['done'],
-				$this->corrections_matches['stats']['count']);
+				$this->corrections_matches['stats'][$key]['done'],
+				$this->corrections_matches['stats'][$key]['count']);
 		}
 		$choices[] = "Return to main menu";
 		$choice = Utils::menu('Select the project you want to clone', $choices, 'Please enter your choice');
@@ -237,10 +174,14 @@ class Cloning
 		{
 			$content = curl_exec($ch);
 			if (strpos($content, 'success') !== false)
+			{
+				Auth::close_connection($ch);
 				return true;
+			}
 			Utils::message(sprintf('No read access on repository, trying again (%d/10)...', $i + 1));
 			sleep(1);
 		}
+		Auth::close_connection($ch);
 		return false;
 	}
 
@@ -256,7 +197,11 @@ class Cloning
 		$ch = Auth::prepare($this->corrections_matches['corrections'][$index]['urls'][$uid]);
 		$content = curl_exec($ch);
 		if (preg_match(VOGSPHERE_REGEX, $content, $matches))
+		{
+			Auth::close_connection($ch);
 			return str_replace('\\', '', $matches[1]);
+		}
+		Auth::close_connection($ch);
 		return false;
 	}
 }

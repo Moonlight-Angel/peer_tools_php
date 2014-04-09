@@ -8,6 +8,7 @@ require('includes/utils.php');
 require('includes/configuration.php');
 require('includes/credentials.php');
 require('includes/auth.php');
+require('includes/parsing.php');
 require('includes/cloning.php');
 require('includes/cleaning.php');
 require('includes/updates.php');
