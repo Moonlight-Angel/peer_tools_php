@@ -121,14 +121,15 @@ class Auth
 	/**
 	 * Closes the curl connection and erases the cookies file.
 	 *
-	 * @param  resource  $ch  Curl handler.
+	 * @param  resource  $ch              Curl handler.
+	 * @param  bool      $delete_cookies  Set to true to delete cookie jar.
 	 * @return curl handler or false if the user is connected or not.
 	 */
-	public static function close_connection($ch)
+	public static function close_connection($ch, $delete_cookies = false)
 	{
 		if ($ch !== false)
 			curl_close($ch);
-		if (file_exists(COOKIE_JAR))
+		if (file_exists(COOKIE_JAR) && $delete_cookies)
 			unlink(COOKIE_JAR);
 	}
 }

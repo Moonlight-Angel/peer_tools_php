@@ -33,7 +33,7 @@ class Cloning
 			else
 				$this->do_clone($choice);
 		}
-		Auth::close_connection($ch);
+		Auth::close_connection($ch, true);
 	}
 
 	/**
@@ -91,10 +91,7 @@ class Cloning
 				}
 			}
 			if (!$this->check_repository_open($index, $key))
-			{
-				Utils::error('No read access on repository after 10 tries. Switching to next.');
 				continue ;
-			}
 			Utils::success('We got read access on repository. Fetching vogsphere url...');
 			$vogsphere = $this->get_vogsphere_url($index, $key);
 			if ($vogsphere === false)
@@ -169,19 +166,21 @@ class Cloning
 	 */
 	private function check_repository_open($index, $uid)
 	{
-		$ch = Auth::prepare($this->corrections_matches['corrections'][$index]['urls'][$uid] . '/repository?format=json');
+		$ch = Auth::prepare($this->corrections_matches['corrections'][$index]['urls'][$uid] . 'repository?format=json');
 		for($i = 0; $i < 10; $i++)
 		{
 			$content = curl_exec($ch);
 			if (strpos($content, 'success') !== false)
-			{
-				Auth::close_connection($ch);
 				return true;
+			else if (strpos($content, 'authentifier') !== false)
+			{
+				Utils::error('Error while checking repository status, you are not connected.');
+				return false;
 			}
 			Utils::message(sprintf('No read access on repository, trying again (%d/10)...', $i + 1));
 			sleep(1);
 		}
-		Auth::close_connection($ch);
+		Utils::error('No read access on repository after 10 tries. Switching to next.');
 		return false;
 	}
 
@@ -197,11 +196,7 @@ class Cloning
 		$ch = Auth::prepare($this->corrections_matches['corrections'][$index]['urls'][$uid]);
 		$content = curl_exec($ch);
 		if (preg_match(VOGSPHERE_REGEX, $content, $matches))
-		{
-			Auth::close_connection($ch);
 			return str_replace('\\', '', $matches[1]);
-		}
-		Auth::close_connection($ch);
 		return false;
 	}
 }
