@@ -5,11 +5,6 @@
  */
 class Auth
 {
-	public function __construct()
-	{
-		$content = '';
-	}
-
 	/**
 	 * Logs the user to the intranet.
 	 *

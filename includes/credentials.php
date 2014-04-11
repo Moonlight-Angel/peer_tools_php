@@ -9,7 +9,7 @@ class Credentials
 	private $username;
 	private $password;
 
-	public function __construct($configuration_instance)
+	public function __construct(Configuration $configuration_instance)
 	{
 		$this->configuration = $configuration_instance;
 		$this->username = $this->configuration->get_username();
