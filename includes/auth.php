@@ -124,8 +124,6 @@ class Auth
 	{
 		if ($ch !== false)
 			curl_close($ch);
-		if (file_exists(COOKIE_JAR) && $delete_cookies)
-			unlink(COOKIE_JAR);
 	}
 }
 

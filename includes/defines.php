@@ -5,7 +5,7 @@
  */
 define('CONFIGURATION_PATH', APP_PATH . '/configuration');
 define('CONFIGURATION_FILE', CONFIGURATION_PATH . '/configuration.pt');
-define('COOKIE_JAR', APP_PATH . '/cookies.pt');
+define('COOKIE_JAR', CONFIGURATION_PATH . '/cookies.pt');
 
 /**
  * URL constants
