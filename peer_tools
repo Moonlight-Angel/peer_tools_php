@@ -18,90 +18,90 @@ require('includes/updates.php');
  */
 class App
 {
-	private $configuration;
-	private $credentials;
-	private $cloning;
-	private $menu;
+  private $configuration;
+  private $credentials;
+  private $cloning;
+  private $menu;
 
-	public function __construct()
-	{
-		$GLOBALS['verbose'] = false;
-		$GLOBALS['version'] = 3;
+  public function __construct()
+  {
+    $GLOBALS['verbose'] = false;
+    $GLOBALS['version'] = 3;
 
-		Utils::success('Peer Tools v' . $GLOBALS['version'] . ' - Hello !');
-		Utils::parse_options();
-		$this->configuration = new Configuration();
-		$this->configuration->init();
-		$this->credentials = new Credentials($this->configuration);
-		$this->credentials->init();
-		$this->cloning = new Cloning($this->credentials);
-		$this->menu = array(
-			'Clone remaining corrections' 				=> [$this->cloning, 'clone_corrections'],
-			'Clean corrections folder (make fclean)'	=> ['Cleaning', 'fclean_corrections'],
-			'Remove .git folders'						=> ['Cleaning', 'remove_git_corrections'],
-			'Delete credentials'						=> [$this->credentials, 'delete_credentials'],
-			'Delete configuration file'					=> [$this->configuration, 'delete_configuration'],
-			'Check for updates'							=> ['Updates', 'check_updates'],
-			'Exit'										=> [$this, 'quit']
-		);
-	}
+    Utils::success('Peer Tools v' . $GLOBALS['version'] . ' - Hello !');
+    Utils::parse_options();
+    $this->configuration = new Configuration();
+    $this->configuration->init();
+    $this->credentials = new Credentials($this->configuration);
+    $this->credentials->init();
+    $this->cloning = new Cloning($this->credentials);
+    $this->menu = array(
+      'Clone remaining corrections'             => [$this->cloning, 'clone_corrections'],
+      'Clean corrections folder (make fclean)'  => ['Cleaning', 'fclean_corrections'],
+      'Remove .git folders'                     => ['Cleaning', 'remove_git_corrections'],
+      'Delete credentials'                      => [$this->credentials, 'delete_credentials'],
+      'Delete configuration file'               => [$this->configuration, 'delete_configuration'],
+      'Check for updates'                       => ['Updates', 'check_updates'],
+      'Exit'                                    => [$this, 'quit']
+    );
+  }
 
-	public function run()
-	{
-		$choice = 0;
-		Updates::check_updates(true);
+  public function run()
+  {
+    $choice = 0;
+    Updates::check_updates(true);
 
-		while (42)
-		{
-			$choice = Utils::menu('Choose your option', array_keys($this->menu), 'Please enter your choise');
-			$choice = array_keys($this->menu)[$choice];
-			if (method_exists($this->menu[$choice][0], $this->menu[$choice][1]))
-				call_user_func(array($this->menu[$choice][0], $this->menu[$choice][1]));
-			else
-				Utils::error('This function doesn\'t exist.');
-		}
-	}
+    while (42)
+    {
+      $choice = Utils::menu('Choose your option', array_keys($this->menu), 'Please enter your choice');
+      $choice = array_keys($this->menu)[$choice];
+      if (method_exists($this->menu[$choice][0], $this->menu[$choice][1]))
+        call_user_func(array($this->menu[$choice][0], $this->menu[$choice][1]));
+      else
+        Utils::error('This function doesn\'t exist.');
+    }
+  }
 
-	/**
-	 * Exits the app.
-	 *
-	 * @param  int  $save  1 to quit with saving, 0 to quit without.
-	 * @return Configuration array or false if an error occured.
-	 */
-	public function quit($save = 1)
-	{
-		if (!$save)
-			Utils::success("Bye bye !");
-		else
-		{
-			Utils::info('Saving configuration...');
-			if (!$this->configuration->save_configuration())
-			{
-				Utils::error("Error while saving configuration.");
-				exit(1);
-			}
-			else
-			{
-				Utils::info("Configuration successfully saved.");
-				Utils::success("Bye bye !");
-			}
-		}
-		exit(0);
-	}
+  /**
+   * Exits the app.
+   *
+   * @param  int  $save  1 to quit with saving, 0 to quit without.
+   * @return Configuration array or false if an error occured.
+   */
+  public function quit($save = 1)
+  {
+    if (!$save)
+      Utils::success("Bye bye !");
+    else
+    {
+      Utils::info('Saving configuration...');
+      if (!$this->configuration->save_configuration())
+      {
+        Utils::error("Error while saving configuration.");
+        exit(1);
+      }
+      else
+      {
+        Utils::info("Configuration successfully saved.");
+        Utils::success("Bye bye !");
+      }
+    }
+    exit(0);
+  }
 
-	/**
-	 * Getters & Setters
-	 */
+  /**
+   * Getters & Setters
+   */
 
-	public function get_configuration()
-	{
-		return $this->configuration;
-	}
+  public function get_configuration()
+  {
+    return $this->configuration;
+  }
 
-	public function get_credentials()
-	{
-		return $this->credentials;
-	}
+  public function get_credentials()
+  {
+    return $this->credentials;
+  }
 }
 
 $app = new App();
